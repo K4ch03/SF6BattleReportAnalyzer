@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env*
+!.env.example
+*.mp4
+*.webm
+*.mov
+.vercel/
