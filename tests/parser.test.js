@@ -36,3 +36,46 @@ test('retired good-action section is omitted including nested content', () => {
   assert.ok(output.includes('改善候補'));
   assert.ok(output.includes('残す'));
 });
+
+import { parseIssues } from '../src/parser.js';
+test('video contexts and shared summaries do not leak between matches',()=>{
+ const md=`# Log
+## 動画情報
+- 動画：first.mp4
+- 相手：マノン
+## Match 001
+- 結果：敗北
+### ラウンド分析
+#### R1：敗北
+old round
+## 動画情報：second.mp4
+- 相手：リュウ
+## Match 002
+- 対戦区間：約0:00～1:00
+### R1：勝利
+new round
+## Match 003
+### R1：敗北
+third round
+## 今回のリソース判断
+shared resources
+## 次の10試合
+1. 待つ
+`;
+ const m=parseMatches(md);
+ assert.equal(m[0].video,'first.mp4');assert.equal(m[1].video,'second.mp4');
+ assert.equal(m[1].opponent,'リュウ');assert.equal(m[1].roundBlocks.length,1);
+ assert.ok(!m[0].body.includes('second.mp4'));assert.ok(!m[2].rounds.includes('shared resources'));
+ assert.equal(m[0].extras.length,0);assert.equal(m[1].extras.length,2);assert.equal(m[2].extras.length,2);
+});
+test('issue details preserve bold metadata and research separation',()=>{
+ const p=`## 実戦課題
+### AKI-003：DI警戒
+- **状態：** 実戦で確認中
+- **行動：** 待つ
+## 調査課題
+### AKI-007：追撃
+- **状態：** 未調査
+`;
+ const issues=parseIssues(p);assert.equal(issues.length,2);assert.equal(issues[0].status,'実戦で確認中');assert.equal(issues[1].kind,'調査課題');
+});
