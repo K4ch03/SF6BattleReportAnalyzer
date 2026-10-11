@@ -1,8 +1,9 @@
+import { withoutGoodActions } from './parser.js';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 marked.setOptions({ gfm: true, breaks: true });
 export function markdown(text = '') {
-  const safe = DOMPurify.sanitize(marked.parse(text), { USE_PROFILES: { html: true }, FORBID_TAGS: ['img','video','audio','iframe','style','input','form'], FORBID_ATTR: ['style'] });
+  const safe = DOMPurify.sanitize(marked.parse(withoutGoodActions(text)), { USE_PROFILES: { html: true }, FORBID_TAGS: ['img','video','audio','iframe','style','input','form'], FORBID_ATTR: ['style'] });
   const root = document.createElement('div'); root.innerHTML = safe;
   root.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
   root.querySelectorAll('table').forEach(table => { const wrap = document.createElement('div'); wrap.className = 'table-scroll'; table.replaceWith(wrap); wrap.append(table); });

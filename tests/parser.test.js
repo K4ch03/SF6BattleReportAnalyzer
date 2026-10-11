@@ -26,3 +26,13 @@ test('profile child headings remain with their parent section',()=>assert.match(
 test('extracts actionable phrases with a maximum of three',()=>{const t=tasks('1. 「待つ」：一拍\n2. 「見る」：観察\n3. 「守る」：ガード\n4. 「四つ目」');assert.equal(t.length,3);assert.deepEqual(t[0],{title:'待つ',description:'一拍'});});
 test('file classification and invalid names',()=>{assert.equal(classify('matches(1).md',fixture),'matches');assert.equal(classify('renamed.md','# AKI Player Profile'),'profile');assert.throws(()=>classify('unrelated.md','hello'));});
 test('timestamps support minutes and hours',()=>{assert.equal(seconds('3:19'),199);assert.equal(seconds('1:02:03'),3723);});
+
+import { withoutGoodActions } from '../src/parser.js';
+test('retired good-action section is omitted including nested content', () => {
+  const source='## Match 001\n### **良かった行動**\n旧内容\n#### 詳細\n詳細内容\n### 改善候補\n残す\n';
+  const output=withoutGoodActions(source);
+  assert.ok(!output.includes('旧内容'));
+  assert.ok(!output.includes('詳細内容'));
+  assert.ok(output.includes('改善候補'));
+  assert.ok(output.includes('残す'));
+});

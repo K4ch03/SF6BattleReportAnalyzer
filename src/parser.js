@@ -47,3 +47,14 @@ export function classify(name, text) {
   throw new Error(name + '：matches.md または player_profile.md を選んでください。');
 }
 export function seconds(timestamp) { return timestamp.split(':').reduce((a, b) => a * 60 + Number(b), 0); }
+
+// Omit retired positive-action summaries from rendered reports, preserving source exports.
+export function withoutGoodActions(md = '') {
+  const result=[];let skipLevel=0;
+  for(const item of sections(md)){
+    if(skipLevel && item.level && item.level<=skipLevel)skipLevel=0;
+    if(/^良かった(?:行動|ところ)$/.test(item.title)){skipLevel=item.level;continue;}
+    if(!skipLevel)result.push((item.level?'#'.repeat(item.level)+' '+item.title+'\n':'')+item.body);
+  }
+  return result.join('');
+}
