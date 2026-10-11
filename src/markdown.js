@@ -1,4 +1,4 @@
-import { withoutGoodActions } from './parser.js';
+import { withoutGoodActions, expandIssueIds } from './parser.js';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 marked.setOptions({ gfm: true, breaks: true });
@@ -6,7 +6,10 @@ export function markdown(text = '') {
   const safe = DOMPurify.sanitize(marked.parse(withoutGoodActions(text)), { USE_PROFILES: { html: true }, FORBID_TAGS: ['img','video','audio','iframe','style','input','form'], FORBID_ATTR: ['style'] });
   const root = document.createElement('div'); root.innerHTML = safe;
   root.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
-  root.querySelectorAll('table').forEach(table => { const labels=[...table.querySelectorAll('thead th')].map(th=>th.textContent); table.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>{td.dataset.label=labels[i]||'';})); const wrap = document.createElement('div'); wrap.className = 'table-scroll'; table.replaceWith(wrap); wrap.append(table); });
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  while(walker.nextNode())if(!walker.currentNode.parentElement.closest('a,code,pre'))walker.currentNode.textContent=expandIssueIds(walker.currentNode.textContent);
+  root.querySelectorAll('table').forEach(table => {
+    table.querySelectorAll('tbody tr').forEach(tr=>{if(tr.cells[0]?.querySelector('strong') && /\d+:\d{2}/.test(tr.cells[0].textContent))tr.classList.add('highlight-scene');}); const labels=[...table.querySelectorAll('thead th')].map(th=>th.textContent); table.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>{td.dataset.label=labels[i]||'';})); const wrap = document.createElement('div'); wrap.className = 'table-scroll'; table.replaceWith(wrap); wrap.append(table); });
   root.querySelectorAll('td').forEach(td => { const t = td.textContent.trim(); if (/^(A|B|C|D|E|F)([：／/。\s]|$)/.test(t)) td.dataset.grade = t[0]; });
   return root.innerHTML;
 }

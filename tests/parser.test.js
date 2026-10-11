@@ -79,3 +79,10 @@ test('issue details preserve bold metadata and research separation',()=>{
 `;
  const issues=parseIssues(p);assert.equal(issues.length,2);assert.equal(issues[0].status,'実戦で確認中');assert.equal(issues[1].kind,'調査課題');
 });
+
+import { expandIssueIds } from '../src/parser.js';
+test('abbreviated issue IDs and renamed video summaries are supported',()=>{
+ assert.equal(expandIssueIds('AKI-008・009・010'),'AKI-008・AKI-009・AKI-010');
+ const ms=parseMatches('## 動画情報：新動画\n- 動画：new.mp4\n## Match 005\n- 関連課題：AKI-008・009・010\n### R1：敗北\nround\n## 双方の体力・ゲージから見た選択：ブランカ戦\nresource\n## 反復と単発の区別：ブランカ戦\npattern\n');
+ assert.deepEqual(ms[0].issues,['AKI-008','AKI-009','AKI-010']);assert.equal(ms[0].extras.length,2);assert.ok(!ms[0].rounds.includes('resource'));
+});
