@@ -70,3 +70,10 @@
 }
 
 .markdown tr.highlight-scene{background:#b19aff0d}.markdown tr.highlight-scene td:first-child{box-shadow:inset 3px 0 #b19aff}.markdown tr.highlight-scene td:first-child::after{content:'注目';display:inline-block;font-size:10px;color:#c9b6ff;margin-left:6px}
+.damage-label{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;padding:3px 8px;border:1px solid transparent;border-radius:999px;font-size:10px;line-height:1.5;white-space:normal;font-weight:600;vertical-align:middle}
+.damage-improve{color:#ffd6a0;background:#6e492626;border-color:#a56e3d70}
+.damage-mixup{color:#d4c0ff;background:#59418a2b;border-color:#8e70c870}
+.damage-opponent{color:#a8c9ff;background:#334d782b;border-color:#5478b870}
+.markdown td .damage-label{display:flex;margin-top:7px}
+.damage-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid #ffffff12}
+.damage-legend>b{width:100%;font-size:11px;color:#d5d1df}.damage-legend small{width:100%;font-size:10px;color:var(--muted)}

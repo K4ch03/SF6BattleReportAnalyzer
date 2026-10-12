@@ -11,6 +11,26 @@ export function markdown(text = '') {
   root.querySelectorAll('table').forEach(table => {
     table.querySelectorAll('tbody tr').forEach(tr=>{if(tr.cells[0]?.querySelector('strong') && /\d+:\d{2}/.test(tr.cells[0].textContent))tr.classList.add('highlight-scene');}); const labels=[...table.querySelectorAll('thead th')].map(th=>th.textContent); table.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>{td.dataset.label=labels[i]||'';})); const wrap = document.createElement('div'); wrap.className = 'table-scroll'; table.replaceWith(wrap); wrap.append(table); });
   root.querySelectorAll('td').forEach(td => { const t = td.textContent.trim(); if (/^(A|B|C|D|E|F)([：／/。\s]|$)/.test(t)) td.dataset.grade = t[0]; });
+  // Turn the damage label added below each scene timestamp into a compact badge.
+  root.querySelectorAll('table tbody tr').forEach(tr => {
+    const timeCell = tr.cells[0];
+    if (!timeCell) return;
+    const walker = document.createTreeWalker(timeCell, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const node of nodes) {
+      const match = /([🟠🟣🔵])\s*(被ダメージ・(?:改善候補|読み合い|相手の好対応))/.exec(node.textContent);
+      if (!match) continue;
+      const badge = document.createElement('span');
+      badge.className = 'damage-label ' + (match[2].includes('改善候補') ? 'damage-improve' : match[2].includes('読み合い') ? 'damage-mixup' : 'damage-opponent');
+      badge.textContent = `${match[1]} ${match[2]}`;
+      const fragment = document.createDocumentFragment();
+      fragment.append(node.textContent.slice(0, match.index), badge, node.textContent.slice(match.index + match[0].length));
+      node.replaceWith(fragment);
+      tr.classList.add('has-damage-label');
+      break;
+    }
+  });
   return root.innerHTML;
 }
 export function timeLinks(container, seek) {
